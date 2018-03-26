@@ -1,0 +1,22 @@
+<button [routerLink]="['manager']">Manager</button><br><br>
+<form (submit)="login()">
+  <label for="logForm.username">Username:</label>
+  <input type="text" name="logForm.username" [(ngModel)]="logForm.username"><br>
+  <label for="logForm.password">Password:</label>
+  <input type="password" name="logForm.password" [(ngModel)]="logForm.password"><br>
+  <span *ngIf="logErr">Login failed.<br></span>
+  <input class="submitButton" type="submit" value="Login">
+</form>
+
+<form (submit)="register()">
+  <label for="regForm.username">Username:</label>
+  <input type="text" name="regForm.username" [(ngModel)]="regForm.username"><br>
+  <span *ngIf="regErr && regErr.errors.username">{{ regErr.errors.username.message }}<br></span>
+  <label for="regForm.password">Password:</label>
+  <input type="password" name="regForm.password" [(ngModel)]="regForm.password"><br>
+  <span *ngIf="regErr && regErr.errors.password">{{ regErr.errors.password.message }}<br></span>
+  <label for="regForm.r_password">Confirm Password:</label>
+  <input type="password" name="regForm.r_password" [(ngModel)]="regForm.r_password"><br>
+  <span *ngIf="regForm.r_password.length > 0 && regForm.password != regForm.r_password">Please make sure password fields match<br></span>
+  <input class="submitButton" type="submit" value="Register">
+</form>

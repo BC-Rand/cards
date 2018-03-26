@@ -1,0 +1,16 @@
+<p>adsf {{ gamestate | json }}</p>
+<button (click)="gamestateHelper('something')">Fun</button>
+<p *ngIf="funBool" style="background-color:blue;">Hello</p>
+<p *ngIf="!funBool" style="background-color:red;">Hello</p>
+<button *ngIf="!gamestate" (click)="findRoomClick()">Search for a game</button>
+<div *ngIf="gamestate">
+  <div id="opponentField">
+    
+  </div>
+  <div id="yourField">
+    
+  </div>
+  <div id="yourHand">
+
+  </div>
+</div>
