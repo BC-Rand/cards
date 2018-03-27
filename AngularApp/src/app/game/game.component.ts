@@ -17,6 +17,7 @@ export class GameComponent implements OnInit {
   opponentHand
   opponentField
   funBool = true;
+  
   constructor(
     private _socket : SocketService,
     private _http : HttpService,
@@ -28,17 +29,7 @@ export class GameComponent implements OnInit {
       this._router.navigate(['']);
     } else {
       this._socket.addGameListeners();
-      window['socket'].removeListener('gamestate', this.gamestateHelper);
-      window['socket'].on('gamestate', this.gamestateHelper);
     }
-  }
-  gamestateHelper(gamestate) {
-    console.log("gamestateHelper was called");
-    console.log(!this.gamestate);
-    console.dir(gamestate);
-    this.gamestate = true;
-    console.log(!this.gamestate);
-    console.dir(this.gamestate);
   }
   findRoomClick() {
     this._socket.startRoomSearch();
