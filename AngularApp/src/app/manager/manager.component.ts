@@ -9,10 +9,6 @@ import { Router } from '@angular/router';
 })
 export class ManagerComponent implements OnInit {
   _id
-  deck = {
-    cards: [],
-    title: "MyDeck"
-  }
   constructor(
     private _http : HttpService,
     private _router : Router
