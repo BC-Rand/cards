@@ -1,12 +1,8 @@
-#opponentField {
+#opponentField, #playerField, #playerHand {
     border: 1px solid black;
-    height:250px;
+    height:150px;
 }
-#yourField {
+#statDiv {
     border: 1px solid black;
-    height:250px;
-}
-#yourHand {
-    border: 1px solid black;
-    height:250px;
+    height: 60px;
 }

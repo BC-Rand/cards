@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpService } from '../http.service';
-import { SocketService } from '../socket.service';
 
 @Component({
   selector: 'app-home',
@@ -47,7 +46,9 @@ export class HomeComponent implements OnInit {
     let obs = this._http.login(this.logForm);
     obs.subscribe(data => {
       if (data['message'] == "Success") {
-        this._http.setLogStatus(data['data']);
+        this._http.setLogStatus(data['data']['id']);
+        this._http.setDeck(data['data']['deck']);
+        console.log(this._http.checkDeck());
         this._router.navigate(['manager']);
       } else {
         this.logErr = true;

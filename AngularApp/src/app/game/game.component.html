@@ -1,16 +1,38 @@
-<p>adsf {{ gamestate | json }}</p>
-<button (click)="gamestateHelper('something')">Fun</button>
-<p *ngIf="funBool" style="background-color:blue;">Hello</p>
-<p *ngIf="!funBool" style="background-color:red;">Hello</p>
 <button *ngIf="!gamestate" (click)="findRoomClick()">Search for a game</button>
 <div *ngIf="gamestate">
+  <div id="statDiv">
+    <p>You<span *ngIf="activeBool">*</span>:     HP: {{ playerHealth }} Mana: {{ playerManaCurrent }}/{{ playerManaTotal }}     Opponent<span *ngIf="!activeBool">*</span>:     HP: {{ opponentHealth }} Mana: {{ opponentManaCurrent }}/{{ opponentManaTotal }}</p>
+  </div>
   <div id="opponentField">
-    
+    <div *ngFor="let card of opponentField" style="display:inline-block;vertical-align:top;width:80px;height:120px;border:1px solid black;">
+      <span>{{ card.name }}</span>
+      <span>{{ card.cost }}</span><br>
+      <span>{{ card.atk }}</span>
+      <span>{{ card.hp }}</span>
+    </div>
   </div>
-  <div id="yourField">
-    
+  <div id="playerField">
+    <div *ngFor="let card of playerField" style="display:inline-block;vertical-align:top;width:80px;height:120px;border:1px solid black;">
+      <span>{{ card.name }}</span>
+      <span>{{ card.cost }}</span><br>
+      <span>{{ card.atk }}</span>
+      <span>{{ card.hp }}</span>
+    </div>
   </div>
-  <div id="yourHand">
-
+  <div id="playerHand">
+    <div *ngFor="let card of playerHand" style="display:inline-block;vertical-align:top;width:80px;height:120px;border:1px solid black;">
+      <span>{{ card.name }}</span>
+      <span>{{ card.cost }}</span><br>
+      <span>{{ card.atk }}</span>
+      <span>{{ card.hp }}</span>
+    </div>
+  </div>
+  <div id="inputDiv" *ngIf="activeBool">
+    <input type="text" [(ngModel)]="attackInput" name="attackInput">
+    <input type="text" [(ngModel)]="defendInput" name="defendInput">
+    <button (click)="attack(attackInput, defendInput)">Attack</button><br>
+    <input type="text" [(ngModel)]="playInput" name="playInput">
+    <button (click)="playCard(playInput)">Play</button><br>
+    <button (click)="endTurn()">End Turn</button>
   </div>
 </div>

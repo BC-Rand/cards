@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 @Injectable()
 export class HttpService {
   _id;
+  deck;
   constructor(
     private _http : HttpClient
   ) { }
@@ -19,7 +20,16 @@ export class HttpService {
   setLogStatus(id) {
     this._id = id;
   }
+  setDeck(deck) {
+    this.deck = deck;
+  }
+  checkDeck() {
+    return this.deck;
+  }
   check_id() {
     return this._id
+  }
+  addDeckToId(id, deck) {
+    return this._http.post('/users/' + id + '/adddeck',{deck:deck})
   }
 }
