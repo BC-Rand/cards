@@ -41,7 +41,14 @@ export class GameComponent implements OnInit {
   oppArr
   oppx
   oppy
-  
+  yourHP
+  yourMana
+  yourCMana
+  oppHP
+  oppMana
+  oppCMana
+  playerhitbox
+    
   constructor(
     private _http : HttpService,
     private _router : Router
@@ -50,7 +57,7 @@ export class GameComponent implements OnInit {
 
   ngOnInit() {
     this.oppx = 0;
-    this.oppy = 140;
+    this.oppy = 240;
     this.x = 0;
     this.y = 820;
     this.cardarr = [null,null,null,null,null,null,null,null,null,null];
@@ -74,6 +81,32 @@ export class GameComponent implements OnInit {
       this.socket.emit("login", this.playerId);
       this.socket.emit('checkRoom');
     }
+    this.yourHP = new PIXI.Text("Health: 30", { fontFamily: 'Snippet', fontSize: 20, fill: 'white'});
+    this.yourHP.x = 100;
+    this.yourHP.y = 740;
+    this.yourMana = new PIXI.Text(0, { fontFamily: 'Snippet', fontSize: 20, fill: 'white'});
+    this.yourMana.x = 180
+    this.yourMana.y = 720;
+    this.yourCMana = new PIXI.Text("Mana: 0/", { fontFamily: 'Snippet', fontSize: 20, fill: 'white'});
+    this.yourCMana.x = 100;
+    this.yourCMana.y = 720;
+    this.oppHP = new PIXI.Text("Health: 30", { fontFamily: 'Snippet', fontSize: 20, fill: 'white'});
+    this.oppHP.x = 100;
+    this.oppHP.y = 0;
+    this.oppMana = new PIXI.Text(0, { fontFamily: 'Snippet', fontSize: 20, fill: 'white'});
+    this.oppMana.x = 180;
+    this.oppMana.y = 20;
+    this.oppCMana = new PIXI.Text("Mana: 0/", { fontFamily: 'Snippet', fontSize: 20, fill: 'white'});
+    this.oppCMana.x = 100;
+    this.oppCMana.y = 20;
+    this.playerhitbox = new PIXI.Graphics();
+    this.playerhitbox.beginFill(0x00aa00);
+    this.playerhitbox.drawRect(0,0,150,60);
+    this.playerhitbox.x = 600 -75;
+    this.playerhitbox.y = 0;
+    this.playerhitbox.interactive = false;
+    this.playerhitbox.buttonMode = true;
+    this.app.stage.addChild(this.yourHP,this.yourMana,this.yourCMana,this.oppHP,this.oppMana,this.oppCMana,this.playerhitbox)
   }
   
   joinRoomHelper(roomName) {
@@ -126,8 +159,12 @@ export class GameComponent implements OnInit {
       this.playerHand.push(cardDraw); //old 
       if (this.playerManaTotal < 10) {
         this.playerManaTotal += 1;
+        console.log(this.playerManaTotal)
+        this.yourMana.text = this.playerManaTotal;
       }
+      this.yourCMana.text = "Mana: "+this.playerManaTotal+"/"
       this.playerManaCurrent = this.playerManaTotal;
+      this.yourMana.text = this.playerManaTotal;
       for (let i=0; i<this.playerField.length; i++) {
         this.playerField[i]['canAtk'] = true;
       }
@@ -136,6 +173,8 @@ export class GameComponent implements OnInit {
       this.opponentHand.push(this.opponentDeck.cards.pop());
       if (this.opponentManaTotal < 10) {
         this.opponentManaTotal += 1;
+        this.oppMana.text = this.opponentManaTotal;
+        this.oppCMana.text = "Mana: " +this.opponentManaTotal +"/"
       }
       this.opponentManaCurrent = this.opponentManaTotal;
       for (let i=0; i<this.opponentField.length; i++) {
@@ -146,6 +185,7 @@ export class GameComponent implements OnInit {
   playCardHelper(index) {
     if (!this.activeBool) {
       this.opponentManaCurrent -= this.opponentHand[index]['cost'];
+      this.oppCMana.text = "Mana: " + this.opponentManaCurrent + "/"
       this.opponentHand[index]['canAtk'] = false;
       var OppMadeCard = this.opponentHand.splice(index, 1)[0]
       this.finishOppCard(OppMadeCard.name,OppMadeCard.cost,OppMadeCard.atk,OppMadeCard.hp)
@@ -166,6 +206,8 @@ export class GameComponent implements OnInit {
         console.log("this.playerHealth: " + this.playerHealth);
         console.log("attacker value: " + this.opponentField[atkIdx]['atk']);
         this.playerHealth -= this.opponentField[atkIdx]['atk'];
+        let numb = this.playerHealth;
+        this.yourHP.text = "Health: " + numb;
         console.log("this.playerHealth: " + this.playerHealth);
       } else {
         this.playerField[defIdx]['hp'] -= this.opponentField[atkIdx]['atk']
@@ -208,6 +250,8 @@ export class GameComponent implements OnInit {
       // Attack animation
       if (defIdx == -1) {
         this.opponentHealth -= this.playerField[atkIdx]['atk'];
+        let numb = this.opponentHealth;
+        this.oppHP.text = "Health: " + numb;
         if (this.opponentHealth <= 0) {
           // You win
           this.socket.emit('Victory');
@@ -535,6 +579,7 @@ Card(Name,Cost,Atk,HP)
                     this.x = 0;
                     this.boardarr[idx] = IDX
                     this.playCard(index)
+                    this.yourCMana.text = "Mana: " + this.playerManaCurrent +"/"
                     this.reDoHand(index);
                     break;
                 }
@@ -549,11 +594,12 @@ Card(Name,Cost,Atk,HP)
             console.log(this);
             if(card.x > 150 && card.x < 250 && card.y > 140 && card.y < 260){
               console.log("Opp Board 0")
+              let BoardIdx = 0;
               let idx = this.findIndex2(cardtextTopLeft.text);
               console.log(idx)
-              this.attack(idx,0)
-              cardtextBottomRight.text = parseInt(cardtextBottomRight.text) - parseInt(this.oppArr[0][2].text)
-              this.oppArr[0][3].text = parseInt(this.oppArr[0][3].text) - parseInt(cardtextBottomLeft.text)
+              this.attack(idx,BoardIdx)
+              cardtextBottomRight.text = parseInt(cardtextBottomRight.text) - parseInt(this.oppArr[BoardIdx][2].text)
+              this.oppArr[BoardIdx][3].text = parseInt(this.oppArr[BoardIdx][3].text) - parseInt(cardtextBottomLeft.text)
               if(parseInt(cardtextBottomRight.text) <= 0){
                 this.app.stage.removeChild(card);
                 this.app.stage.removeChild(cardtextTopLeft);
@@ -563,14 +609,14 @@ Card(Name,Cost,Atk,HP)
                 this.boardarr.splice(idx,1)
                 this.reDoHand2(idx) // fix
               }
-              if(parseInt(this.oppArr[0][3].text) <= 0){
-                this.app.stage.removeChild(this.oppArr[0][0]);
-                this.app.stage.removeChild(this.oppArr[0][1]);
-                this.app.stage.removeChild(this.oppArr[0][2]);
-                this.app.stage.removeChild(this.oppArr[0][3]);
-                this.app.stage.removeChild(this.oppArr[0][4]);
-                this.oppArr.splice(0,1)
-                for(var idx2 = 0; idx2 < this.oppArr.length; idx2++){
+              if(parseInt(this.oppArr[BoardIdx][3].text) <= 0){
+                this.app.stage.removeChild(this.oppArr[BoardIdx][0]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][1]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][2]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][3]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][4]);
+                this.oppArr.splice(BoardIdx,1)
+                for(var idx2 = BoardIdx; idx2 < this.oppArr.length; idx2++){
                   if(this.oppArr[idx2]){
                     this.oppArr[idx2][0].x -= 120;
                     this.oppArr[idx2][1].x -= 120;
@@ -582,23 +628,224 @@ Card(Name,Cost,Atk,HP)
               }
               // cardtextBottomLeft.text = parseInt(cardtextBottomLeft.text) - 1;
             }
-            else if(card.x > 270 && card.x < 370 && card.y > 140 && card.y < 260){
+            else if(card.x > 270 && card.x < 370 && card.y > 240 && card.y < 360){
               console.log("Opp Board 1")
+              let BoardIdx = 1;
+              let idx = this.findIndex2(cardtextTopLeft.text);
+              console.log(idx)
+              this.attack(idx,BoardIdx)
+              cardtextBottomRight.text = parseInt(cardtextBottomRight.text) - parseInt(this.oppArr[BoardIdx][2].text)
+              this.oppArr[BoardIdx][3].text = parseInt(this.oppArr[BoardIdx][3].text) - parseInt(cardtextBottomLeft.text)
+              if(parseInt(cardtextBottomRight.text) <= 0){
+                this.app.stage.removeChild(card);
+                this.app.stage.removeChild(cardtextTopLeft);
+                this.app.stage.removeChild(cardtextBottomLeft);
+                this.app.stage.removeChild(cardtextBottomRight);
+                this.app.stage.removeChild(cardtextTopRight);
+                this.boardarr.splice(idx,1)
+                this.reDoHand2(idx) // fix
+              }
+              if(parseInt(this.oppArr[BoardIdx][3].text) <= 0){
+                this.app.stage.removeChild(this.oppArr[BoardIdx][0]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][1]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][2]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][3]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][4]);
+                this.oppArr.splice(BoardIdx,1)
+                for(var idx2 = BoardIdx; idx2 < this.oppArr.length; idx2++){
+                  if(this.oppArr[idx2]){
+                    this.oppArr[idx2][0].x -= 120;
+                    this.oppArr[idx2][1].x -= 120;
+                    this.oppArr[idx2][2].x -= 120;
+                    this.oppArr[idx2][3].x -= 120;
+                    this.oppArr[idx2][4].x -= 120;
+                  }
+                }
+              }
             }
-            else if(card.x > 390 && card.x < 490 && card.y > 140 && card.y < 260){
+            else if(card.x > 390 && card.x < 490 && card.y > 240 && card.y < 360){
               console.log("Opp Board 2")
+              let BoardIdx = 2;
+              let idx = this.findIndex2(cardtextTopLeft.text);
+              console.log(idx)
+              this.attack(idx,BoardIdx)
+              cardtextBottomRight.text = parseInt(cardtextBottomRight.text) - parseInt(this.oppArr[BoardIdx][2].text)
+              this.oppArr[BoardIdx][3].text = parseInt(this.oppArr[BoardIdx][3].text) - parseInt(cardtextBottomLeft.text)
+              if(parseInt(cardtextBottomRight.text) <= 0){
+                this.app.stage.removeChild(card);
+                this.app.stage.removeChild(cardtextTopLeft);
+                this.app.stage.removeChild(cardtextBottomLeft);
+                this.app.stage.removeChild(cardtextBottomRight);
+                this.app.stage.removeChild(cardtextTopRight);
+                this.boardarr.splice(idx,1)
+                this.reDoHand2(idx) // fix
+              }
+              if(parseInt(this.oppArr[BoardIdx][3].text) <= 0){
+                this.app.stage.removeChild(this.oppArr[BoardIdx][0]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][1]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][2]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][3]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][4]);
+                this.oppArr.splice(BoardIdx,1)
+                for(var idx2 = BoardIdx; idx2 < this.oppArr.length; idx2++){
+                  if(this.oppArr[idx2]){
+                    this.oppArr[idx2][0].x -= 120;
+                    this.oppArr[idx2][1].x -= 120;
+                    this.oppArr[idx2][2].x -= 120;
+                    this.oppArr[idx2][3].x -= 120;
+                    this.oppArr[idx2][4].x -= 120;
+                  }
+                }
+              }
             }
-            else if(card.x > 510 && card.x < 610 && card.y > 140 && card.y < 260){
+            else if(card.x > 510 && card.x < 610 && card.y > 240 && card.y < 360){
               console.log("Opp Board 3")
+              let BoardIdx = 3;
+              let idx = this.findIndex2(cardtextTopLeft.text);
+              console.log(idx)
+              this.attack(idx,BoardIdx)
+              cardtextBottomRight.text = parseInt(cardtextBottomRight.text) - parseInt(this.oppArr[BoardIdx][2].text)
+              this.oppArr[BoardIdx][3].text = parseInt(this.oppArr[BoardIdx][3].text) - parseInt(cardtextBottomLeft.text)
+              if(parseInt(cardtextBottomRight.text) <= 0){
+                this.app.stage.removeChild(card);
+                this.app.stage.removeChild(cardtextTopLeft);
+                this.app.stage.removeChild(cardtextBottomLeft);
+                this.app.stage.removeChild(cardtextBottomRight);
+                this.app.stage.removeChild(cardtextTopRight);
+                this.boardarr.splice(idx,1)
+                this.reDoHand2(idx) // fix
+              }
+              if(parseInt(this.oppArr[BoardIdx][3].text) <= 0){
+                this.app.stage.removeChild(this.oppArr[BoardIdx][0]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][1]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][2]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][3]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][4]);
+                this.oppArr.splice(BoardIdx,1)
+                for(var idx2 = BoardIdx; idx2 < this.oppArr.length; idx2++){
+                  if(this.oppArr[idx2]){
+                    this.oppArr[idx2][0].x -= 120;
+                    this.oppArr[idx2][1].x -= 120;
+                    this.oppArr[idx2][2].x -= 120;
+                    this.oppArr[idx2][3].x -= 120;
+                    this.oppArr[idx2][4].x -= 120;
+                  }
+                }
+              }
             }
-            else if(card.x > 630 && card.x < 730 && card.y > 140 && card.y < 260){
+            else if(card.x > 630 && card.x < 730 && card.y > 240 && card.y < 360){
               console.log("Opp Board 4")
+              let BoardIdx = 4;
+              let idx = this.findIndex2(cardtextTopLeft.text);
+              console.log(idx)
+              this.attack(idx,BoardIdx)
+              cardtextBottomRight.text = parseInt(cardtextBottomRight.text) - parseInt(this.oppArr[BoardIdx][2].text)
+              this.oppArr[BoardIdx][3].text = parseInt(this.oppArr[BoardIdx][3].text) - parseInt(cardtextBottomLeft.text)
+              if(parseInt(cardtextBottomRight.text) <= 0){
+                this.app.stage.removeChild(card);
+                this.app.stage.removeChild(cardtextTopLeft);
+                this.app.stage.removeChild(cardtextBottomLeft);
+                this.app.stage.removeChild(cardtextBottomRight);
+                this.app.stage.removeChild(cardtextTopRight);
+                this.boardarr.splice(idx,1)
+                this.reDoHand2(idx) // fix
+              }
+              if(parseInt(this.oppArr[BoardIdx][3].text) <= 0){
+                this.app.stage.removeChild(this.oppArr[BoardIdx][0]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][1]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][2]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][3]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][4]);
+                this.oppArr.splice(BoardIdx,1)
+                for(var idx2 = BoardIdx; idx2 < this.oppArr.length; idx2++){
+                  if(this.oppArr[idx2]){
+                    this.oppArr[idx2][0].x -= 120;
+                    this.oppArr[idx2][1].x -= 120;
+                    this.oppArr[idx2][2].x -= 120;
+                    this.oppArr[idx2][3].x -= 120;
+                    this.oppArr[idx2][4].x -= 120;
+                  }
+                }
+              }
             }
-            else if(card.x > 750 && card.x < 850 && card.y > 140 && card.y < 260){
+            else if(card.x > 750 && card.x < 850 && card.y > 240 && card.y < 360){
               console.log("Opp Board 5")
+              let BoardIdx = 5;
+              let idx = this.findIndex2(cardtextTopLeft.text);
+              console.log(idx)
+              this.attack(idx,BoardIdx)
+              cardtextBottomRight.text = parseInt(cardtextBottomRight.text) - parseInt(this.oppArr[BoardIdx][2].text)
+              this.oppArr[BoardIdx][3].text = parseInt(this.oppArr[BoardIdx][3].text) - parseInt(cardtextBottomLeft.text)
+              if(parseInt(cardtextBottomRight.text) <= 0){
+                this.app.stage.removeChild(card);
+                this.app.stage.removeChild(cardtextTopLeft);
+                this.app.stage.removeChild(cardtextBottomLeft);
+                this.app.stage.removeChild(cardtextBottomRight);
+                this.app.stage.removeChild(cardtextTopRight);
+                this.boardarr.splice(idx,1)
+                this.reDoHand2(idx) // fix
+              }
+              if(parseInt(this.oppArr[BoardIdx][3].text) <= 0){
+                this.app.stage.removeChild(this.oppArr[BoardIdx][0]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][1]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][2]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][3]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][4]);
+                this.oppArr.splice(BoardIdx,1)
+                for(var idx2 = BoardIdx; idx2 < this.oppArr.length; idx2++){
+                  if(this.oppArr[idx2]){
+                    this.oppArr[idx2][0].x -= 120;
+                    this.oppArr[idx2][1].x -= 120;
+                    this.oppArr[idx2][2].x -= 120;
+                    this.oppArr[idx2][3].x -= 120;
+                    this.oppArr[idx2][4].x -= 120;
+                  }
+                }
+              }
             }
-            else if(card.x > 870 && card.x < 970 && card.y > 140 && card.y < 260){
+            else if(card.x > 870 && card.x < 970 && card.y > 240 && card.y < 360){
               console.log("Opp Board 6")
+              let BoardIdx = 6;
+              let idx = this.findIndex2(cardtextTopLeft.text);
+              console.log(idx)
+              this.attack(idx,BoardIdx)
+              cardtextBottomRight.text = parseInt(cardtextBottomRight.text) - parseInt(this.oppArr[BoardIdx][2].text)
+              this.oppArr[BoardIdx][3].text = parseInt(this.oppArr[BoardIdx][3].text) - parseInt(cardtextBottomLeft.text)
+              if(parseInt(cardtextBottomRight.text) <= 0){
+                this.app.stage.removeChild(card);
+                this.app.stage.removeChild(cardtextTopLeft);
+                this.app.stage.removeChild(cardtextBottomLeft);
+                this.app.stage.removeChild(cardtextBottomRight);
+                this.app.stage.removeChild(cardtextTopRight);
+                this.boardarr.splice(idx,1)
+                this.reDoHand2(idx) // fix
+              }
+              if(parseInt(this.oppArr[BoardIdx][3].text) <= 0){
+                this.app.stage.removeChild(this.oppArr[BoardIdx][0]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][1]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][2]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][3]);
+                this.app.stage.removeChild(this.oppArr[BoardIdx][4]);
+                this.oppArr.splice(BoardIdx,1)
+                for(var idx2 = BoardIdx; idx2 < this.oppArr.length; idx2++){
+                  if(this.oppArr[idx2]){
+                    this.oppArr[idx2][0].x -= 120;
+                    this.oppArr[idx2][1].x -= 120;
+                    this.oppArr[idx2][2].x -= 120;
+                    this.oppArr[idx2][3].x -= 120;
+                    this.oppArr[idx2][4].x -= 120;
+                  }
+                }
+              }
+            }
+            else if(card.x > 525 && card.x < 675 && card.y > 0 && card.y < 60){
+              console.log("Opp Board 6")
+              let BoardIdx = -1;
+              let idx = this.findIndex2(cardtextTopLeft.text);
+              console.log(idx)
+              this.attack(idx,BoardIdx)
+              let numb = this.opponentHealth
+              this.oppHP.text = "Health: "+numb;
             }
           }
             card.x = spotx;
