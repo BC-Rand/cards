@@ -153,7 +153,7 @@ export class GameComponent implements OnInit {
   }
   startTurnHelper() {
     if (!this.activeBool) {
-      this.activeBool = true;
+      this.activeBool = true; // turn starts
       var cardDraw = this.playerDeck.cards.pop()
       this.finishCard(cardDraw.name,cardDraw.cost,cardDraw.atk,cardDraw.hp) //Create card
       this.playerHand.push(cardDraw); //old 
@@ -169,7 +169,7 @@ export class GameComponent implements OnInit {
         this.playerField[i]['canAtk'] = true;
       }
     } else {
-      this.activeBool = false;
+      this.activeBool = false; //turn over
       this.opponentHand.push(this.opponentDeck.cards.pop());
       if (this.opponentManaTotal < 10) {
         this.opponentManaTotal += 1;
@@ -216,10 +216,11 @@ export class GameComponent implements OnInit {
           // Death animation
           this.opponentField.splice(atkIdx, 1);
         }
-        if (this.playerField[defIdx]['hp']) {
+        if (this.playerField[defIdx]['hp'] <= 0) {
           // Death animation
           this.playerField.splice(defIdx, 1);
         }
+
       }
     }
   }
@@ -244,7 +245,7 @@ export class GameComponent implements OnInit {
     }
   }
   attack(atkIdx, defIdx) {
-    if (atkIdx < this.playerField.length && this.playerField[atkIdx]['canAtk'] && defIdx < this.opponentField.length && (defIdx = -1 || this.opponentField[defIdx])) {
+    if (atkIdx < this.playerField.length && this.playerField[atkIdx]['canAtk'] && defIdx < this.opponentField.length && (defIdx == -1 || this.opponentField[defIdx])) {
       this.socket.emit('attack', {atkIdx:atkIdx, defIdx:defIdx});
       this.playerField[atkIdx]['canAtk'] = false;
       // Attack animation
