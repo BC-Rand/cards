@@ -68,16 +68,25 @@ app.post("/users/register", function(req, res) {
         [3,6,4,"FireFly"],
         [4,5,4,"ChillYeti"],
         [5,4,4,"Ancient"],
-        [4,6,5,"Smith"],
-        [5,5,5,"Sergeant"],
-        [6,7,6,"Ogre"],
-        [7,6,6,"StoneMan"],
-        [9,5,7,"Hound"],
-        [8,8,8,"LavaMan"]
+        [4,6,5,"Smith"]
     ]
     for (let i=0; i<cardArr.length; i++) {
-        
+        let temp = {
+            atk: cardArr[0],
+            hp: cardArr[1],
+            cost: cardArr[2],
+            name: cardArr[3]
+        }
+        let temp2 = {
+            atk: cardArr[0],
+            hp: cardArr[1],
+            cost: cardArr[2],
+            name: cardArr[3]
+        }
+        sampleDeck.cards.push(temp);
+        sampleDeck.cards.push(temp2);
     }
+    newUser.decks.push(sampleDeck);
     User.findOne({username:req.body.username}, function(err, user) {
         if (user != null) {
             newUser.validate(function(err) {
