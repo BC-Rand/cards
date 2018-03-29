@@ -72,16 +72,16 @@ app.post("/users/register", function(req, res) {
     ]
     for (let i=0; i<cardArr.length; i++) {
         let temp = {
-            atk: cardArr[0],
-            hp: cardArr[1],
-            cost: cardArr[2],
-            name: cardArr[3]
+            atk: cardArr[i][0],
+            hp: cardArr[i][1],
+            cost: cardArr[i][2],
+            name: cardArr[i][3]
         }
         let temp2 = {
-            atk: cardArr[0],
-            hp: cardArr[1],
-            cost: cardArr[2],
-            name: cardArr[3]
+            atk: cardArr[i][0],
+            hp: cardArr[i][1],
+            cost: cardArr[i][2],
+            name: cardArr[i][3]
         }
         sampleDeck.cards.push(temp);
         sampleDeck.cards.push(temp2);
