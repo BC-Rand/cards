@@ -48,6 +48,7 @@ export class GameComponent implements OnInit {
   oppMana
   oppCMana
   playerhitbox
+  endturn
     
   constructor(
     private _http : HttpService,
@@ -106,7 +107,14 @@ export class GameComponent implements OnInit {
     this.playerhitbox.y = 0;
     this.playerhitbox.interactive = false;
     this.playerhitbox.buttonMode = true;
-    this.app.stage.addChild(this.yourHP,this.yourMana,this.yourCMana,this.oppHP,this.oppMana,this.oppCMana,this.playerhitbox)
+    this.endturn = new PIXI.Graphics();
+    this.endturn.beginFill(0xaa0000);
+    this.endturn.drawRect(0,0,90,50);
+    this.endturn.x = 1200 - 90;
+    this.endturn.y = 450 - 25;
+    this.endturn.interactive = false;
+    this.endturn.buttonMode = true;
+    this.app.stage.addChild(this.yourHP,this.yourMana,this.yourCMana,this.oppHP,this.oppMana,this.oppCMana,this.playerhitbox,this.endturn)
   }
   
   joinRoomHelper(roomName) {
@@ -154,6 +162,18 @@ export class GameComponent implements OnInit {
   startTurnHelper() {
     if (!this.activeBool) {
       this.activeBool = true; // turn starts
+      this.endturn.beginFill(0x00aa00);
+      this.endturn.interactive = true;
+      for(let idx = 0; idx < this.boardarr.length; idx++){
+        if(this.boardarr[idx]){
+          this.boardarr[idx][0].interactive = true;
+        }
+      }
+      for(let idx = 0; idx < this.cardarr.length; idx++){
+        if(this.cardarr[idx]){
+          this.cardarr[idx][0].interactive = true;
+        }
+      }
       var cardDraw = this.playerDeck.cards.pop()
       this.finishCard(cardDraw.name,cardDraw.cost,cardDraw.atk,cardDraw.hp) //Create card
       this.playerHand.push(cardDraw); //old 
@@ -170,6 +190,18 @@ export class GameComponent implements OnInit {
       }
     } else {
       this.activeBool = false; //turn over
+      this.endturn.beginFill(0xaa0000);
+      this.endturn.interactive = false;
+      for(let idx = 0; idx < this.boardarr.length; idx++){
+        if(this.boardarr[idx]){
+          this.boardarr[idx][0].interactive = false;
+        }
+      }
+      for(let idx = 0; idx < this.cardarr.length; idx++){
+        if(this.cardarr[idx]){
+          this.cardarr[idx][0].interactive = false;
+        }
+      }
       this.opponentHand.push(this.opponentDeck.cards.pop());
       if (this.opponentManaTotal < 10) {
         this.opponentManaTotal += 1;
@@ -211,6 +243,7 @@ export class GameComponent implements OnInit {
         console.log("this.playerHealth: " + this.playerHealth);
       } else {
         this.playerField[defIdx]['hp'] -= this.opponentField[atkIdx]['atk']
+        //HERE
         this.opponentField[atkIdx]['hp'] -= this.playerField[defIdx]['atk']
         if (this.opponentField[atkIdx]['hp'] <= 0) {
           // Death animation
@@ -220,7 +253,57 @@ export class GameComponent implements OnInit {
           // Death animation
           this.playerField.splice(defIdx, 1);
         }
-
+        console.log(defIdx+"DEFENSE");
+        console.log(atkIdx+"ATTACK");
+        console.log("HIT")
+              let PlayerIdx = defIdx;
+              let OppIdx = atkIdx
+              console.log("PlayerIdx: " + PlayerIdx + " OppIdx: " + OppIdx);
+              console.log(this.boardarr[PlayerIdx])
+              console.log(this.oppArr[OppIdx])
+              // this.attack(idx,BoardIdx)
+              this.boardarr[PlayerIdx][3].text = parseInt(this.boardarr[PlayerIdx][3].text) - parseInt(this.oppArr[OppIdx][2].text)
+              this.oppArr[OppIdx][3].text = parseInt(this.oppArr[OppIdx][3].text) - parseInt(this.boardarr[PlayerIdx][2].text)
+              if(parseInt(this.boardarr[PlayerIdx][3].text) <= 0){
+                console.log("BOARD DELETE")
+                console.log(this.boardarr[PlayerIdx][3])
+                this.app.stage.removeChild(this.boardarr[PlayerIdx][0]);
+                this.app.stage.removeChild(this.boardarr[PlayerIdx][1]);
+                this.app.stage.removeChild(this.boardarr[PlayerIdx][2]);
+                this.app.stage.removeChild(this.boardarr[PlayerIdx][3]);
+                this.app.stage.removeChild(this.boardarr[PlayerIdx][4]);
+                console.log("Pre-splice PlayerIdx: " + PlayerIdx);
+                this.boardarr.splice(PlayerIdx,1)
+                for(let idx2 = PlayerIdx; idx2 < this.oppArr.length; idx2++){
+                  if(this.boardarr[idx2]){
+                    this.boardarr[idx2][0].x -= 120;
+                    this.boardarr[idx2][1].x -= 120;
+                    this.boardarr[idx2][2].x -= 120;
+                    this.boardarr[idx2][3].x -= 120;
+                    this.boardarr[idx2][4].x -= 120;
+                  }
+                }
+              }
+              if(parseInt(this.oppArr[OppIdx][3].text) <= 0){
+                this.app.stage.removeChild(this.oppArr[OppIdx][0]);
+                this.app.stage.removeChild(this.oppArr[OppIdx][1]);
+                this.app.stage.removeChild(this.oppArr[OppIdx][2]);
+                this.app.stage.removeChild(this.oppArr[OppIdx][3]);
+                this.app.stage.removeChild(this.oppArr[OppIdx][4]);
+                console.log(OppIdx)
+                console.log("Removing from oppArr idx: " + OppIdx);
+                this.oppArr.splice(OppIdx,1)
+                for(let idx2 = OppIdx; idx2 < this.oppArr.length; idx2++){
+                  if(this.oppArr[idx2]){
+                    this.oppArr[idx2][0].x -= 120;
+                    this.oppArr[idx2][1].x -= 120;
+                    this.oppArr[idx2][2].x -= 120;
+                    this.oppArr[idx2][3].x -= 120;
+                    this.oppArr[idx2][4].x -= 120;
+                  }
+                }
+              }
+        
       }
     }
   }
@@ -559,6 +642,7 @@ Card(Name,Cost,Atk,HP)
             //     console.log("Shit")
             // }
             // console.log(FI[1])
+            card.interactive = false;
             var index = FI[0]
             var IDX = FI[1];
             for(var idx = 0; idx < this.boardarr.length;idx++){
@@ -627,7 +711,7 @@ Card(Name,Cost,Atk,HP)
                   }
                 }
               }
-              // cardtextBottomLeft.text = parseInt(cardtextBottomLeft.text) - 1;
+              card.interactive = false;
             }
             else if(card.x > 270 && card.x < 370 && card.y > 240 && card.y < 360){
               console.log("Opp Board 1")
@@ -663,6 +747,7 @@ Card(Name,Cost,Atk,HP)
                   }
                 }
               }
+              card.interactive = false;
             }
             else if(card.x > 390 && card.x < 490 && card.y > 240 && card.y < 360){
               console.log("Opp Board 2")
@@ -698,6 +783,7 @@ Card(Name,Cost,Atk,HP)
                   }
                 }
               }
+              card.interactive = false;
             }
             else if(card.x > 510 && card.x < 610 && card.y > 240 && card.y < 360){
               console.log("Opp Board 3")
@@ -733,6 +819,7 @@ Card(Name,Cost,Atk,HP)
                   }
                 }
               }
+              card.interactive = false;
             }
             else if(card.x > 630 && card.x < 730 && card.y > 240 && card.y < 360){
               console.log("Opp Board 4")
@@ -768,6 +855,7 @@ Card(Name,Cost,Atk,HP)
                   }
                 }
               }
+              card.interactive = false;
             }
             else if(card.x > 750 && card.x < 850 && card.y > 240 && card.y < 360){
               console.log("Opp Board 5")
@@ -803,6 +891,7 @@ Card(Name,Cost,Atk,HP)
                   }
                 }
               }
+              card.interactive = false;
             }
             else if(card.x > 870 && card.x < 970 && card.y > 240 && card.y < 360){
               console.log("Opp Board 6")
@@ -838,6 +927,7 @@ Card(Name,Cost,Atk,HP)
                   }
                 }
               }
+              card.interactive = false;
             }
             else if(card.x > 525 && card.x < 675 && card.y > 0 && card.y < 60){
               console.log("Opp Board 6")
