@@ -119,14 +119,6 @@ export class GameComponent implements OnInit {
     this.endturn.interactive = false;
     this.endturn.buttonMode = true;
     this.endturn.on("pointerdown", this.endTurn.bind(this))
-    // this.restart = new PIXI.Graphics();
-    // this.restart.beginFill(0x0000aa);
-    // this.restart.drawRect(0,0,90,50);
-    // this.restart.x = 1200 - 90;
-    // this.restart.y = 400 - 25;
-    // this.restart.interactive = true;
-    // this.restart.buttonMode = true;
-    // this.restart.on("pointerdown", this.Restart.bind(this))
     this.app.stage.addChild(this.yourHP,this.yourMana,this.yourCMana,this.oppHP,this.oppMana,this.oppCMana,this.playerhitbox,this.endturn)
   }
   // endButton(){
@@ -140,73 +132,39 @@ export class GameComponent implements OnInit {
   //   endturn.on("pointerdown", console.log("Hello"))
   //   this.app.stage.addChild(this.endTurn)
   // }
-  // Restart(){
-  //   console.log("Restart")
-  //   console.log(this.oppArr)
-  //   console.log(this.playerHand) 
-  //   console.log(this.cardarr)
-  //   console.log(this.boardarr)
-  //   for(let z = 0; z < this.oppArr.length; z++){
-  //     if(this.oppArr[z]){
-  //       this.app.stage.removeChild(this.oppArr[z][0]);
-  //       this.app.stage.removeChild(this.oppArr[z][1]);
-  //       this.app.stage.removeChild(this.oppArr[z][2]);
-  //       this.app.stage.removeChild(this.oppArr[z][3]);
-  //       this.app.stage.removeChild(this.oppArr[z][4]);
-  //       this.oppArr[z] = null;
-  //     }
-  //   }
-  //   for(let z = 0; z < this.cardarr.length; z++){
-  //     if(this.cardarr[z]){
-  //       this.app.stage.removeChild(this.cardarr[z][0]);
-  //       this.app.stage.removeChild(this.cardarr[z][1]);
-  //       this.app.stage.removeChild(this.cardarr[z][2]);
-  //       this.app.stage.removeChild(this.cardarr[z][3]);
-  //       this.app.stage.removeChild(this.cardarr[z][4]);
-  //       this.cardarr[z] = null;
-  //     }
-  //   }
-  //   for(let z = 0; z < this.boardarr.length; z++){
-  //     if(this.boardarr[z]){
-  //       this.app.stage.removeChild(this.boardarr[z][0]);
-  //       this.app.stage.removeChild(this.boardarr[z][1]);
-  //       this.app.stage.removeChild(this.boardarr[z][2]);
-  //       this.app.stage.removeChild(this.boardarr[z][3]);
-  //       this.app.stage.removeChild(this.boardarr[z][4]);
-  //       this.boardarr[z] = null;
-  //     }
-  //     for(var idx = 0; idx < this.playerField.length; idx++){
-  //       console.log(this.playerField[idx])
-  //       this.finishOppCard(this.playerHand[idx].name,this.playerHand[idx].cost,this.playerHand[idx].atk,this.playerHand[idx].hp)
-  //       console.log(this.cardarr[idx])
-  //       this.cardarr[idx][0].x = idx * 120 + 200;
-  //       this.cardarr[idx][0].y = 500;
-  //       console.log(this.cardarr[idx][0].x);
-  //       console.log(this.cardarr[idx][0].y);
-  //       this.cardarr[idx][1].x = this.cardarr[idx][0].x - 50;
-  //       this.cardarr[idx][1].x = this.cardarr[idx][0].y-60;
-  //       this.cardarr[idx][2].x = this.cardarr[idx][0].x-50;
-  //       this.cardarr[idx][2].x = this.cardarr[idx][0].y+35;
-  //       this.cardarr[idx][3].x = this.cardarr[idx][0].x+47 -  this.cardarr[idx][3].width;
-  //       this.cardarr[idx][3].x = this.cardarr[idx][0].y+35;
-  //       this.cardarr[idx][4].x = this.cardarr[idx][0].x+47 -  this.cardarr[idx][4].width;
-  //       this.cardarr[idx][4].x = this.cardarr[idx][0].y-60;
-  //     }
-  //     for(idx = 0; idx < this.cardarr.length; idx++){
-  //       if(this.cardarr[idx]){
-  //         this.boardarr[idx] = this.cardarr[idx];
-  //       }
-  //     }
-  //     this.cardarr = [null,null,null,null,null,null,null,null,null,null]
-  //     for(var idx = 0; idx < this.playerHand.length; idx++){
-  //       this.finishCard(this.playerHand[idx].name,this.playerHand[idx].cost,this.playerHand[idx].atk,this.playerHand[idx].hp)
-  //     }
-  //     for(var idx = 0; idx < this.opponentField.length; idx++){
-  //       this.finishOppCard(this.opponentField[idx].name,this.opponentField[idx].cost,this.opponentField[idx].atk,this.opponentField[idx].hp)
-  //     }
-  //   }
-  //   return
-  // }
+  Restart(){
+    for(let z = 0; z < this.oppArr.length; z++){
+      if(this.oppArr[z]){
+        this.app.stage.removeChild(this.oppArr[z][0]);
+        this.app.stage.removeChild(this.oppArr[z][1]);
+        this.app.stage.removeChild(this.oppArr[z][2]);
+        this.app.stage.removeChild(this.oppArr[z][3]);
+        this.app.stage.removeChild(this.oppArr[z][4]);
+        this.oppArr[z] = null;
+      }
+    }
+    for(let z = 0; z < this.cardarr.length; z++){
+      if(this.cardarr[z]){
+        this.app.stage.removeChild(this.cardarr[z][0]);
+        this.app.stage.removeChild(this.cardarr[z][1]);
+        this.app.stage.removeChild(this.cardarr[z][2]);
+        this.app.stage.removeChild(this.cardarr[z][3]);
+        this.app.stage.removeChild(this.cardarr[z][4]);
+        this.cardarr[z] = null;
+      }
+    }
+    for(let z = 0; z < this.boardarr.length; z++){
+      if(this.boardarr[z]){
+        this.app.stage.removeChild(this.boardarr[z][0]);
+        this.app.stage.removeChild(this.boardarr[z][1]);
+        this.app.stage.removeChild(this.boardarr[z][2]);
+        this.app.stage.removeChild(this.boardarr[z][3]);
+        this.app.stage.removeChild(this.boardarr[z][4]);
+        this.boardarr[z] = null;
+      }
+    }
+    return
+  }
   // DummyFunction(){
   //   console.log("Hello")
   //   console.log(this.oppArr)
@@ -253,7 +211,16 @@ export class GameComponent implements OnInit {
     console.log("this.playerId: " + this.playerId);
     this.activeBool = (this.gamestate['activePlayer'] != this.playerId);
     console.log("Am active player: " + this.activeBool);
-  }
+    let Name = new PIXI.Text(this.opponentUsername, { fontFamily: 'Snippet', fontSize: 30, fill: 'white'});
+      Name.x = 600 - Name.width/2;
+      Name.y = 5;
+      this.app.stage.addChild(Name)
+      let UrName = new PIXI.Text(this.playerUsername, { fontFamily: 'Snippet', fontSize: 20, fill: 'white'});
+      UrName.x = 1100;
+      UrName.y = 740;
+      this.app.stage.addChild(UrName)
+    }
+    
   getDeckHelper(roomName) {
     let responseObj = {
       roomId: roomName,
@@ -415,10 +382,28 @@ export class GameComponent implements OnInit {
   victoryHelper(winnerId) {
     if (winnerId == this.playerId) {
       // Player wins
-      console.log("You win");
+      console.log("You Win");
+      this.Restart()
+      let Name = new PIXI.Text(this.playerUsername, { fontFamily: 'Snippet', fontSize: 120, fill: 'white'});
+      Name.x = 300 - Name.width/2;
+      Name.y = 400;
+      let Won = new PIXI.Text("Won!", { fontFamily: 'Snippet', fontSize: 120, fill: 'white'});
+      Won.x = 600 - Won.width/2;
+      Won.y = 500;
+      this.app.stage.addChild(Name,Won)
+      // your name
     } else {
       // Opponent wins
       console.log("You lose");
+      this.Restart()
+      let Name = new PIXI.Text(this.opponentUsername, { fontFamily: 'Snippet', fontSize: 120, fill: 'white'});
+      Name.x = 600 - Name.width/2;
+      Name.y = 300;
+      let Won = new PIXI.Text("Won!", { fontFamily: 'Snippet', fontSize: 120, fill: 'white'});
+      Won.x = 600 - Won.width/2;
+      Won.y = 500;
+      this.app.stage.addChild(Name,Won)
+      // opp name
     }
   }
   findRoomClick() {
