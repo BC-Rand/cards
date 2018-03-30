@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 var session = require("express-session");
 var path = require('path');
-mongoose.connect('mongodb://localhost/my_first_db');
+mongoose.connect('mongodb://localhost/cards_db');
 var app = express();
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -35,7 +35,16 @@ var UserSchema = new mongoose.Schema({
         minlength: [8, "Passwords must be 8 or more characters"]
     },
     decks: {
-        type: Array
+        type: Array,
+        default: []
+    },
+    wins: {
+        type: Number,
+        default: 0
+    },
+    gamesCompleted: {
+        type: Number,
+        default: 0
     }
 }, {timestamps: true});
 
@@ -63,7 +72,7 @@ app.post("/users/register", function(req, res) {
         [4,1,2,"Duskboar"],
         [2,3,2,"Croclisk"],
         [3,3,3,"Grizzly"],
-        [5,1,3,"MagmaMan"],
+        [5,1,3,"MagMan"],
         [2,4,3,"Tentacle"],
         [3,6,4,"FireFly"],
         [4,5,4,"ChillYeti"],
@@ -108,7 +117,7 @@ app.post("/users/register", function(req, res) {
                             res.json({message:"Fail", data:err});
                         } else {
                             req.session._id = newUser._id;
-                            res.json({message:"Success", data:newUser._id});
+                            res.json({message:"Success", data:newUser});
                         }
                     });
                 }
@@ -125,7 +134,7 @@ app.post("/users/login", function(req, res) {
             console.log("user != null");
             if (bcrypt.compareSync(req.body.password, user.password)) {
                 req.session._id = user._id;
-                res.json({message:"Success", data:{id:user._id, deck:user.decks[0]}});
+                res.json({message:"Success", data:user});
             } else {
                 console.log("passwords do not match");
                 res.json({message:"Fail", data:{}});
@@ -155,7 +164,13 @@ app.post('/users/:id/adddeck', function(req, res) {
 })
 app.get("/users/session", function(req, res) {
     if (req.session.hasOwnProperty("_id")) {
-        res.json({message:"Success", data:req.session._id});
+        User.findOne({_id:req.session._id}, function(err, user) {
+            if (user != null) {
+                res.json({message:"Success", data:user});
+            } else {
+                res.json({message:"Fail", data:{}});
+            }
+        });
     } else {
         res.json({message:"Fail", data:{}});
     }
@@ -327,6 +342,10 @@ io.sockets.on('connection', function (socket) {
     });
     socket.on('disconnect', function() {
         console.log("Disconnect socket.id: " + socket.id + " mongo _id: " + socketMongo[socket.id]);
+        let index = searchers.indexOf(socketMongo[socket.id]);
+        if (index !== -1)  {
+            searchers.splice(index, 1);
+        }
         delete mongoSocket[socketMongo[socket.id]]
         delete socketMongo[socket.id]
     });
