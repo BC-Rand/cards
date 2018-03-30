@@ -114,9 +114,23 @@ export class GameComponent implements OnInit {
     this.endturn.y = 450 - 25;
     this.endturn.interactive = false;
     this.endturn.buttonMode = true;
+    this.endturn.on("pointerdown", this.Restart)
     this.app.stage.addChild(this.yourHP,this.yourMana,this.yourCMana,this.oppHP,this.oppMana,this.oppCMana,this.playerhitbox,this.endturn)
   }
-  
+  // endButton(){
+  //   var endturn = new PIXI.Graphics();
+  //   endturn.beginFill(0xaa0000);
+  //   endturn.drawRect(0,0,90,50);
+  //   endturn.x = 1200 - 90;
+  //   endturn.y = 450 - 25;
+  //   endturn.interactive = false;
+  //   endturn.buttonMode = true;
+  //   endturn.on("pointerdown", console.log("Hello"))
+  //   this.app.stage.addChild(this.endTurn)
+  // }
+  DummyFunction(){
+    console.log("Hello")
+  }
   joinRoomHelper(roomName) {
     console.log("Server is placing you in a room")
     this.socket.emit("joinRoom", roomName);
@@ -543,6 +557,42 @@ finishCard(Name,Cost,Atk,HP){
     }
     return
 }
+Restart(){
+  console.log("Restart")
+  console.log(this.oppArr)
+  console.log(this.cardarr)
+  console.log(this.boardarr)
+  for(let z = 0; z < this.oppArr.length; z++){
+    if(this.oppArr[z]){
+      this.app.stage.removeChild(this.oppArr[z][0]);
+      this.app.stage.removeChild(this.oppArr[z][1]);
+      this.app.stage.removeChild(this.oppArr[z][2]);
+      this.app.stage.removeChild(this.oppArr[z][3]);
+      this.app.stage.removeChild(this.oppArr[z][4]);
+      this.oppArr[z] = null;
+    }
+  }
+  for(let z = 0; z < this.cardarr.length; z++){
+    if(this.cardarr[z]){
+      this.app.stage.removeChild(this.cardarr[z][0]);
+      this.app.stage.removeChild(this.cardarr[z][1]);
+      this.app.stage.removeChild(this.cardarr[z][2]);
+      this.app.stage.removeChild(this.cardarr[z][3]);
+      this.app.stage.removeChild(this.cardarr[z][4]);
+      this.cardarr[z] = null;
+    }
+  }
+  for(let z = 0; z < this.boardarr.length; z++){
+    if(this.boardarr[z]){
+      this.app.stage.removeChild(this.boardarr[z][0]);
+      this.app.stage.removeChild(this.boardarr[z][1]);
+      this.app.stage.removeChild(this.boardarr[z][2]);
+      this.app.stage.removeChild(this.boardarr[z][3]);
+      this.app.stage.removeChild(this.boardarr[z][4]);
+      this.boardarr[z] = null;
+    }
+  }
+}
 TL(val){
 
     var z;
@@ -937,6 +987,7 @@ Card(Name,Cost,Atk,HP)
               this.attack(idx,BoardIdx)
               let numb = this.opponentHealth
               this.oppHP.text = "Health: "+numb;
+              card.interactive = false;
             }
           }
             card.x = spotx;
