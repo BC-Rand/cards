@@ -228,9 +228,11 @@ io.sockets.on('connection', function (socket) {
         if (gamestates[data['roomId']]['player1'] == socketMongo[socket.id]) {
             console.log("Setting player 1 deck");
             gamestates[data['roomId']]['player1Deck'] = data['deck'];
+            gamestates[data['roomId']]['player1Username'] = data['username'];
         } else if (gamestates[data['roomId']]['player2'] == socketMongo[socket.id]) {
             console.log("Setting player 2 deck");
             gamestates[data['roomId']]['player2Deck'] = data['deck'];
+            gamestates[data['roomId']]['player2Username'] = data['username'];
         }
     });
     socket.on("findGame", function() {
@@ -250,6 +252,8 @@ io.sockets.on('connection', function (socket) {
                     gamestates[roomId] = {
                         player1: player1,
                         player2: player2,
+                        player1Username: "",
+                        player2Username: "",
                         activePlayer: player1,
                         inactivePlayer: player2,
                         player1Deck: [],
@@ -285,13 +289,17 @@ io.sockets.on('connection', function (socket) {
         } else {
             playerString = 'player2';
         }
+        console.log("Player's Name: " + gamestates[roomId][playerString + 'Username']);
         console.log("Player's Hand: " + gamestates[roomId][playerString + 'Hand']);
+        console.log("Cardname at index: " + gamestates[roomId][playerString + 'Hand'][index]['name'])
         gamestates[roomId][playerString + 'ManaCurrent'] -= gamestates[roomId][playerString + 'Hand'][index]['cost'];
         gamestates[roomId][playerString + 'Hand'][index]['canAtk'] = false;
         gamestates[roomId][playerString + 'Field'].push(gamestates[roomId][playerString + 'Hand'].splice(index, 1)[0]);
     });
 
     socket.on('attack', function(obj) {
+        console.log("socket.on('attack') obj: ");
+        console.log(obj);
         let atkIdx = obj['atkIdx'], defIdx = obj['defIdx'], roomId = mongoRoomId[socketMongo[socket.id]];
         let playerString, opponentString;
         io.to(roomId).emit('attack', obj);
@@ -306,8 +314,13 @@ io.sockets.on('connection', function (socket) {
         if (defIdx == -1) {
             gamestates[roomId][opponentString + "Health"] -= gamestates[roomId][playerString + 'Field'][atkIdx]['atk'];
         } else {
+            console.log("Attacker: " + gamestates[roomId][playerString + 'Username']);
+            console.log("Defender: " + gamestates[roomId][opponentString + 'Username']);
+            console.log(gamestates[roomId][opponentString + 'Field'])
+            console.log("defIdx" + defIdx);
+            console.log()
             gamestates[roomId][opponentString + 'Field'][defIdx]['hp'] -= gamestates[roomId][playerString + 'Field'][atkIdx]['atk'];
-            gamestates[roomId][playerString + 'Field'][defIdx]['hp'] -= gamestates[roomId][opponentString + 'Field'][defIdx]['atk'];
+            gamestates[roomId][playerString + 'Field'][atkIdx]['hp'] -= gamestates[roomId][opponentString + 'Field'][defIdx]['atk'];
             if (gamestates[roomId][opponentString + 'Field'][defIdx]['hp'] <= 0) {
                 gamestates[roomId][opponentString + 'Field'].splice(defIdx, 1);
             }
@@ -338,7 +351,7 @@ io.sockets.on('connection', function (socket) {
         io.to(roomId).emit('startTurn');
     });
     socket.on('Victory', function() {
-        io.to(roomId).emit('Victory', socketMongo[socket.id]);
+        io.to(mongoRoomId[socketMongo[socket.id]]).emit('Victory', socketMongo[socket.id]);
     });
     socket.on('disconnect', function() {
         console.log("Disconnect socket.id: " + socket.id + " mongo _id: " + socketMongo[socket.id]);
