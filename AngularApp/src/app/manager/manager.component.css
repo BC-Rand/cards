@@ -1,0 +1,33 @@
+.deckDiv {
+    width:657px;
+    display:inline-block;
+    vertical-align: top;
+}
+.cardDiv {
+    display:inline-block;
+    vertical-align:top;
+    width:80px;
+    height:120px;
+    border:1px solid black;
+}
+.costSpan {
+    float:right;
+    margin-right:5px;
+}
+.atkSpan {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 5px;
+    margin-top:80px;
+}
+.hpSpan {
+    display: inline-block;
+    vertical-align: top;
+    margin-top:80px;
+    margin-right:5px;
+    margin-left: 50px;
+}
+table {
+    display: inline-block;
+    vertical-align: top;
+}

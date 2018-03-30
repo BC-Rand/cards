@@ -33,7 +33,10 @@ export class HomeComponent implements OnInit {
         console.log("inside obs callback");
         if (data['message'] == "Success") {
           console.log(data['data']);
-          this._http.setLogStatus(data['data']);
+          this._http.setLogStatus(data['data']['_id']);
+          this._http.setDeck(data['data']['decks'][0]);
+          this._http.setUser(data['data']);
+          console.log(this._http.checkDeck());
           this._router.navigate(['manager']);
         }
       });
@@ -46,26 +49,32 @@ export class HomeComponent implements OnInit {
     let obs = this._http.login(this.logForm);
     obs.subscribe(data => {
       if (data['message'] == "Success") {
-        this._http.setLogStatus(data['data']['id']);
-        this._http.setDeck(data['data']['deck']);
+        this._http.setLogStatus(data['data']['_id']);
+        this._http.setDeck(data['data']['decks'][0]);
+        this._http.setUser(data['data']);
         console.log(this._http.checkDeck());
         this._router.navigate(['manager']);
       } else {
         this.logErr = true;
       }
-    })
+    });
   }
   register() {
     console.log(this.regForm);
-    let obs = this._http.register(this.regForm);
-    obs.subscribe(data => {
-      if (data['message'] == "Success") {
-        this._http.setLogStatus(data['data']);
-        this._router.navigate(['manager']);
-      } else {
-        this.regErr = data['data'];
-      }
-    });
+    if (this.regForm.password == this.regForm.r_password) {
+      let obs = this._http.register(this.regForm);
+      obs.subscribe(data => {
+        if (data['message'] == "Success") {
+          this._http.setLogStatus(data['data']['_id']);
+          this._http.setDeck(data['data']['decks'][0]);
+          this._http.setUser(data['data']);
+          console.log(this._http.checkDeck());
+          this._router.navigate(['manager']);
+        } else {
+          this.regErr = data['data'];
+        }
+      });
+    }
   }
 
 }

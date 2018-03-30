@@ -1,1 +1,47 @@
 <button (click)="goToGame()">Go To Game Component</button>
+<div *ngIf="user">
+  <p>{{ user.username }}</p>
+  <div *ngIf="user.decks">
+    <input type="number" [(ngModel)]="deckInput" name="deckInput"><button *ngIf="deckInput < user.decks.length" (click)="setDeck()">Set deck</button><br>
+    <div *ngIf="deckInput < user.decks.length" class="deckDiv">
+      <span>{{ user.decks[deckInput].title }}</span><br>
+      <div *ngFor="let card of user.decks[deckInput].cards" class="cardDiv">
+          <span>{{ card.name }}</span>
+          <span class="costSpan">{{ card.cost }}</span><br>
+          <span class="atkSpan">{{ card.atk }}</span>
+          <span class="hpSpan">{{ card.hp }}</span>
+      </div>
+    </div>
+    <div *ngIf="deckInput >= user.decks.length">
+      <input type="text" [(ngModel)]="newDeck.title" name="newDeck.title"><button (click)="submitNewDeck()">Add Deck</button><button (click)="resetNewDeck()">Reset Deck</button><br>
+      <div>
+        <div class="deckDiv">
+          <div *ngFor="let card of newDeck.cards" class="cardDiv">
+              <span>{{ card.name }}</span>
+              <span class="costSpan">{{ card.cost }}</span><br>
+              <span class="atkSpan">{{ card.atk }}</span>
+              <span class="hpSpan">{{ card.hp }}</span>
+          </div>
+        </div>
+        
+          <table>
+            <tr>
+              <th>Name</th>
+              <th>Cost</th>
+              <th>Attack</th>
+              <th>Health</th>
+              <th>Add to Deck</th>
+            </tr>
+            <tr *ngFor="let card of cardTable; let i = index">
+              <td>{{ card[3] }}</td>
+              <td>{{ card[2] }}</td>
+              <td>{{ card[0] }}</td>
+              <td>{{ card[1] }}</td>
+              <td><button *ngIf="cardTableAdds[i] < 2" (click)="addToNewDeck(i)">Add</button></td>
+            </tr>
+          </table>
+        
+      </div>
+    </div>
+  </div>
+</div>

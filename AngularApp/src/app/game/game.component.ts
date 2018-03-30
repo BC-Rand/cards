@@ -31,6 +31,7 @@ export class GameComponent implements OnInit {
   opponentManaTotal;
   playerManaCurrent;
   opponentManaCurrent;
+  endTurnBool = false;
   socket = io('http://localhost:8000');
   //Brandons Vars
   app;
@@ -163,11 +164,15 @@ export class GameComponent implements OnInit {
     this.opponentManaTotal = this.gamestate[onum + 'ManaTotal'];
     this.playerManaCurrent = this.gamestate[pnum + 'ManaCurrent'];
     this.opponentManaCurrent = this.gamestate[onum + 'ManaCurrent'];
+    console.log("gamestate['activePlayer']" + this.gamestate['activePlayer']);
+    console.log("this.playerId: " + this.playerId);
     this.activeBool = (this.gamestate['activePlayer'] != this.playerId);
+    console.log("Am active player: " + this.activeBool);
   }
   getDeckHelper(roomName) {
     let responseObj = {
       roomId: roomName,
+      username: this._http.checkUser().username,
       deck: this.playerDeck
     }
     console.log('getDeckHelper responseObj: ', responseObj);
@@ -175,6 +180,7 @@ export class GameComponent implements OnInit {
   }
   startTurnHelper() {
     if (!this.activeBool) {
+      this.endTurnBool = false;
       this.activeBool = true; // turn starts
       this.endturn.beginFill(0x00aa00);
       this.endturn.interactive = true;
@@ -342,6 +348,7 @@ export class GameComponent implements OnInit {
     }
   }
   attack(atkIdx, defIdx) {
+    console.log("attack.  atlkIdx: " + atkIdx + " defIdx: " + defIdx);
     if (atkIdx < this.playerField.length && this.playerField[atkIdx]['canAtk'] && defIdx < this.opponentField.length && (defIdx == -1 || this.opponentField[defIdx])) {
       this.socket.emit('attack', {atkIdx:atkIdx, defIdx:defIdx});
       this.playerField[atkIdx]['canAtk'] = false;
@@ -369,7 +376,10 @@ export class GameComponent implements OnInit {
     }
   }
   endTurn() {
-    this.socket.emit('endTurn');
+    if (!this.endTurnBool) {
+      this.socket.emit('endTurn');
+      this.endTurnBool = true;
+    }
   }
 
     findIndex(Val){

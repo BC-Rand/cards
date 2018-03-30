@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
 var session = require("express-session");
 var path = require('path');
-mongoose.connect('mongodb://localhost/my_first_db');
+mongoose.connect('mongodb://localhost/cards_db');
 var app = express();
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -35,7 +35,16 @@ var UserSchema = new mongoose.Schema({
         minlength: [8, "Passwords must be 8 or more characters"]
     },
     decks: {
-        type: Array
+        type: Array,
+        default: []
+    },
+    wins: {
+        type: Number,
+        default: 0
+    },
+    gamesCompleted: {
+        type: Number,
+        default: 0
     }
 }, {timestamps: true});
 
@@ -63,7 +72,7 @@ app.post("/users/register", function(req, res) {
         [4,1,2,"Duskboar"],
         [2,3,2,"Croclisk"],
         [3,3,3,"Grizzly"],
-        [5,1,3,"MagmaMan"],
+        [5,1,3,"MagMan"],
         [2,4,3,"Tentacle"],
         [3,6,4,"FireFly"],
         [4,5,4,"ChillYeti"],
@@ -108,7 +117,7 @@ app.post("/users/register", function(req, res) {
                             res.json({message:"Fail", data:err});
                         } else {
                             req.session._id = newUser._id;
-                            res.json({message:"Success", data:newUser._id});
+                            res.json({message:"Success", data:newUser});
                         }
                     });
                 }
@@ -125,7 +134,7 @@ app.post("/users/login", function(req, res) {
             console.log("user != null");
             if (bcrypt.compareSync(req.body.password, user.password)) {
                 req.session._id = user._id;
-                res.json({message:"Success", data:{id:user._id, deck:user.decks[0]}});
+                res.json({message:"Success", data:user});
             } else {
                 console.log("passwords do not match");
                 res.json({message:"Fail", data:{}});
@@ -155,7 +164,13 @@ app.post('/users/:id/adddeck', function(req, res) {
 })
 app.get("/users/session", function(req, res) {
     if (req.session.hasOwnProperty("_id")) {
-        res.json({message:"Success", data:req.session._id});
+        User.findOne({_id:req.session._id}, function(err, user) {
+            if (user != null) {
+                res.json({message:"Success", data:user});
+            } else {
+                res.json({message:"Fail", data:{}});
+            }
+        });
     } else {
         res.json({message:"Fail", data:{}});
     }
@@ -213,9 +228,11 @@ io.sockets.on('connection', function (socket) {
         if (gamestates[data['roomId']]['player1'] == socketMongo[socket.id]) {
             console.log("Setting player 1 deck");
             gamestates[data['roomId']]['player1Deck'] = data['deck'];
+            gamestates[data['roomId']]['player1Username'] = data['username'];
         } else if (gamestates[data['roomId']]['player2'] == socketMongo[socket.id]) {
             console.log("Setting player 2 deck");
             gamestates[data['roomId']]['player2Deck'] = data['deck'];
+            gamestates[data['roomId']]['player2Username'] = data['username'];
         }
     });
     socket.on("findGame", function() {
@@ -235,6 +252,8 @@ io.sockets.on('connection', function (socket) {
                     gamestates[roomId] = {
                         player1: player1,
                         player2: player2,
+                        player1Username: "",
+                        player2Username: "",
                         activePlayer: player1,
                         inactivePlayer: player2,
                         player1Deck: [],
@@ -270,13 +289,17 @@ io.sockets.on('connection', function (socket) {
         } else {
             playerString = 'player2';
         }
+        console.log("Player's Name: " + gamestates[roomId][playerString + 'Username']);
         console.log("Player's Hand: " + gamestates[roomId][playerString + 'Hand']);
+        console.log("Cardname at index: " + gamestates[roomId][playerString + 'Hand'][index]['name'])
         gamestates[roomId][playerString + 'ManaCurrent'] -= gamestates[roomId][playerString + 'Hand'][index]['cost'];
         gamestates[roomId][playerString + 'Hand'][index]['canAtk'] = false;
         gamestates[roomId][playerString + 'Field'].push(gamestates[roomId][playerString + 'Hand'].splice(index, 1)[0]);
     });
 
     socket.on('attack', function(obj) {
+        console.log("socket.on('attack') obj: ");
+        console.log(obj);
         let atkIdx = obj['atkIdx'], defIdx = obj['defIdx'], roomId = mongoRoomId[socketMongo[socket.id]];
         let playerString, opponentString;
         io.to(roomId).emit('attack', obj);
@@ -291,8 +314,13 @@ io.sockets.on('connection', function (socket) {
         if (defIdx == -1) {
             gamestates[roomId][opponentString + "Health"] -= gamestates[roomId][playerString + 'Field'][atkIdx]['atk'];
         } else {
+            console.log("Attacker: " + gamestates[roomId][playerString + 'Username']);
+            console.log("Defender: " + gamestates[roomId][opponentString + 'Username']);
+            console.log(gamestates[roomId][opponentString + 'Field'])
+            console.log("defIdx" + defIdx);
+            console.log()
             gamestates[roomId][opponentString + 'Field'][defIdx]['hp'] -= gamestates[roomId][playerString + 'Field'][atkIdx]['atk'];
-            gamestates[roomId][playerString + 'Field'][defIdx]['hp'] -= gamestates[roomId][opponentString + 'Field'][defIdx]['atk'];
+            gamestates[roomId][playerString + 'Field'][atkIdx]['hp'] -= gamestates[roomId][opponentString + 'Field'][defIdx]['atk'];
             if (gamestates[roomId][opponentString + 'Field'][defIdx]['hp'] <= 0) {
                 gamestates[roomId][opponentString + 'Field'].splice(defIdx, 1);
             }
@@ -323,10 +351,14 @@ io.sockets.on('connection', function (socket) {
         io.to(roomId).emit('startTurn');
     });
     socket.on('Victory', function() {
-        io.to(roomId).emit('Victory', socketMongo[socket.id]);
+        io.to(mongoRoomId[socketMongo[socket.id]]).emit('Victory', socketMongo[socket.id]);
     });
     socket.on('disconnect', function() {
         console.log("Disconnect socket.id: " + socket.id + " mongo _id: " + socketMongo[socket.id]);
+        let index = searchers.indexOf(socketMongo[socket.id]);
+        if (index !== -1)  {
+            searchers.splice(index, 1);
+        }
         delete mongoSocket[socketMongo[socket.id]]
         delete socketMongo[socket.id]
     });

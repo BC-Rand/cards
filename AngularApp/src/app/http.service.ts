@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 export class HttpService {
   _id;
   deck;
+  user;
   constructor(
     private _http : HttpClient
   ) { }
@@ -22,6 +23,12 @@ export class HttpService {
   }
   setDeck(deck) {
     this.deck = deck;
+  }
+  setUser(user) {
+    this.user = user
+  }
+  checkUser() {
+    return this.user;
   }
   checkDeck() {
     return this.deck;
